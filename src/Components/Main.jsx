@@ -1,36 +1,58 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Card from "./Card";
 import Pokeinfo from "./Pokeinfo";
 import axios from "axios";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const Main = () => {
-    const [getPokeData,setPokeData] = useState([])
-    const [loading,setLoading]= useState(true)
-    const [getUrl, setUrl]=useState("https://pokeapi.co/api/v2/pokemon/ ")
-    const [nextUrl, setNextUrl]= useState()
-    const pokeFun= async()=>{
+
+    const [loading,setLoading] = useState(true)
+    const [url,setUrl] = useState("https://pokeapi.co/api/v2/pokemon/")
+    const [nextUrl, setNextUrl] = useState()
+    const [precUrl, setPrevUrl] = useState()
+    const [pokeData, setPokeData] = useState([])
+
+    const getAllPokemons = async () =>{
         setLoading(true)
-        const res = await axios.get(getUrl)
-        console.log(res)
+        const res = await axios.get(`${url}?limit=50&offset=0`)
+        getPokemon(res.data.results)
+        setNextUrl(res.data.next)
+        setPrevUrl(res.data.previous)
+        setLoading(false)
+        console.log(pokeData)     
     }
-    
+
+    const getPokemon = async(res)=>{
+        res.map(async(item)=>{
+            const result = await axios.get(item.url)
+            console.log(result.data)
+            setPokeData(result.data)
+        })
+        
+    }
+
+    // const cardPokemon = () =>{
+    //     if(!pokeData){
+    //         pokeData.map((item) =>{
+    //             return   <Card pokemon={item} />
+    //         })
+    //     }
+    //     else
+    //         return <h1>holaa</h1>
+    // }
 
     useEffect(()=>{
-        pokeFun()
-    },[url])
+        getAllPokemons()
+    },[])
+
     return(
         <>
             <div className="container">
                 <div className="left-content">
-                    <Card />
-                    <Card />
-                    <Card />
-                    <Card />
-                    <Card />
-                    <Card />
+
+                     <Card pokemon={pokeData} loading={loading}/>
                     <div className="btn-group">
-                        <button>Previous</button>
+                        <button >Previous</button>
                         <button>Next</button>
                     </div>
                 </div>
